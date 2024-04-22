@@ -1,4 +1,3 @@
-
 package handler
 
 import (
@@ -11,6 +10,20 @@ import (
 func Handler(w http.ResponseWriter, r *http.Request) {
 	server := New()
 
+
+
+	// Middleware pour gérer les CORS
+	server.Use(func(context *Context) {
+		context.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		context.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		context.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if context.Method == "OPTIONS" {
+			context.Status(http.StatusOK)
+			return
+		}
+		context.Next()
+	})
+
 	server.GET("/", func(context *Context) {
 		context.JSON(200, H{
 			"message": "hello go from vercel !!!!",
@@ -22,10 +35,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			context.JSON(400, H{
 				"message": "name not found",
 			})
-		} else {
-			context.JSON(200, H{
-				"data": fmt.Sprintf("Hello %s!", name),
-			})
+			} else {
+				context.JSON(200, H{
+					"data": fmt.Sprintf("Hello %s!", name),
+				})
 		}
 	})
 	server.GET("/user/:id", func(context *Context) {
@@ -44,3 +57,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	})
 	server.Handle(w, r)
 }
+
+// func CORSMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+// 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+// 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+// 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(204)
+// 			return
+// 		}
+
+// 		c.Next()
+// 	}
+// }
